@@ -26,6 +26,11 @@ def recognize_anything(img_path, return_anno_img=False):
     print(tags)
     return ' || '.join(tags), ram_res['img_res']
 
+def dino_annotate(img_path, text_description):
+    if img_path is None or text_description is None or text_description.strip()=="":
+        return '[ INVALID INPUT ]', None
+    dino_res = ram.get_bbox(img_path, [text_description])
+    return "[ SUCCESS ]", dino_res
 
 # Description
 title = f"<center><strong><font size='8'>万物检测⭐powered by 1684x <font></strong></center>"
@@ -33,14 +38,8 @@ title = f"<center><strong><font size='8'>万物检测⭐powered by 1684x <font><
 description_e = f"""### 这是在1684X上部署[Recognize Anything Model (RAM)](https://github.com/xinyu1205/recognize-anything)+GroundingDINO实现万物检测的示例。             
               """
 
-description_p = """ # 使用方法
 
-                1. 上传/拍摄需要检测的图像。
-                2. 若需要框出物体位置，请勾选“标注位置”。
-
-              """
-
-default_example = ["./resources/image/demo1.jpg"]
+default_example = ["./resources/image/demo1.jpg", "./resources/image/demo3.jpg"]
 
 css = "h1 { text-align: center } .about { text-align: justify; padding-left: 10%; padding-right: 10%; }"
 
@@ -52,37 +51,84 @@ with gr.Blocks(css=css, title="万物检测") as demo:
             gr.Markdown(title)
             gr.Markdown(description_e)
     
-    with gr.Row():
-        with gr.Column():
-            img_inputs = gr.Image(label="选择图片", value=default_example[0], type='filepath')
-            using_dino = gr.Checkbox(label="标注位置", value=True)
-        with gr.Column():
-            tags_area = gr.Textbox(label='标签', interactive=False)
-            annotated_img = gr.Image(label="检测结果", interactive=False)
-            
+    with gr.Tab('检测一切'):
+        description_p = """ # 使用方法
 
-    # Submit & Clear
-    with gr.Row():
-        with gr.Column():
-            with gr.Row():
-                with gr.Column():
-                    det_btn_p = gr.Button(
-                        "检测", variant="primary"
-                    )
-                    clear_btn_p = gr.Button("清空", variant="secondary")
+                1. 上传/拍摄需要检测的图像。
+                2. 若需要框出物体位置，请勾选“标注位置”。
+                3. 点击“检测”。
+              """
+        with gr.Row():
+            with gr.Column():
+                img_inputs = gr.Image(label="选择图片", value=default_example[0], type='filepath')
+                using_dino = gr.Checkbox(label="标注位置", value=True)
+            with gr.Column():
+                tags_area = gr.Textbox(label='标签', interactive=False)
+                annotated_img = gr.Image(label="检测结果", interactive=False)
+                
+
+        # Submit & Clear
+        with gr.Row():
+            with gr.Column():
+                with gr.Row():
+                    with gr.Column():
+                        det_btn_p = gr.Button(
+                            "检测", variant="primary"
+                        )
+                        clear_btn_p = gr.Button("清空", variant="secondary")
 
 
-        with gr.Column():
-            # Description
-            gr.Markdown(description_p)
+            with gr.Column():
+                # Description
+                gr.Markdown(description_p)
 
-    det_btn_p.click(
-        recognize_anything, inputs=[img_inputs, using_dino], outputs=[tags_area, annotated_img]#, json_str]
-    )
-    def clear():
-        return [None, None, None]
+        det_btn_p.click(
+            recognize_anything, inputs=[img_inputs, using_dino], outputs=[tags_area, annotated_img]#, json_str]
+        )
+        def clear():
+            return [None, None, None]
 
-    clear_btn_p.click(clear, outputs=[img_inputs, tags_area, annotated_img])
+        clear_btn_p.click(clear, outputs=[img_inputs, tags_area, annotated_img])
+    
+    with gr.Tab('检测【指定物】'):
+        description_p = """ # 使用方法
+
+                    1. 上传/拍摄需要检测的图像。
+                    2. 填写物体描述【英文】。
+                    3. 点击“检测”。
+
+                """
+        with gr.Row():
+            with gr.Column():
+                dino_img_input = gr.Image(label="选择图片", value=default_example[0], type='filepath')
+                text_input = gr.Text(label="需检测物体的描述")
+            with gr.Column():
+                msg_area = gr.Textbox(label='Log', interactive=False)
+                annotated_img = gr.Image(label="检测结果", interactive=False)
+    
+        # Submit & Clear
+        with gr.Row():
+            with gr.Column():
+                with gr.Row():
+                    with gr.Column():
+                        det_btn_p = gr.Button(
+                            "检测", variant="primary"
+                        )
+                        clear_btn_p = gr.Button("清空", variant="secondary")
+
+
+            with gr.Column():
+                # Description
+                gr.Markdown(description_p)
+
+        det_btn_p.click(
+            dino_annotate, inputs=[dino_img_input, text_input], outputs=[msg_area, annotated_img]#, json_str]
+        )
+        def clear():
+            return [None, None, None]
+
+        clear_btn_p.click(clear, outputs=[dino_img_input, annotated_img, msg_area])
+
 
 demo.queue()
 demo.launch(ssl_verify=False, server_name="0.0.0.0")

@@ -26,7 +26,7 @@ class RAM:
         self.tag_list_chinese = load_tag_list(tag_list_chinese)
         self.tokenizer = BertTokenizerFast.from_pretrained(tokenizer_path)
     
-    def __call__(self, image_path, return_bbox=True, box_threshold=0.25, text_threshold=0.2, iou_threshold=0.5):
+    def __call__(self, image_path, return_bbox=True, box_threshold=0.25, text_threshold=0.20, iou_threshold=0.5):
         token_en, token_ch = self.detect_tag(image_path)
         ret = {
             'tag_en': token_en,
@@ -39,6 +39,7 @@ class RAM:
                                             box_threshold=box_threshold, 
                                             text_threshold=text_threshold, 
                                             iou_threshold=iou_threshold)
+            img_with_bboxes.save(f'{box_threshold}-{text_threshold}-{iou_threshold}.jpg')
             ret['img_res'] = img_with_bboxes
         return ret
 
