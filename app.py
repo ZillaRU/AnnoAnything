@@ -54,13 +54,13 @@ with gr.Blocks(css=css, title="万物检测") as demo:
     with gr.Tab('检测一切'):
         description_p = """ # 使用方法
 
-                1. 上传/拍摄需要检测的图像。
+                1. 上传需要检测的图像。
                 2. 若需要框出物体位置，请勾选“标注位置”。
                 3. 点击“检测”。
               """
         with gr.Row():
             with gr.Column():
-                img_inputs = gr.Image(label="选择图片", value=default_example[0], type='filepath')
+                img_inputs = gr.Image(label="选择图片", value=default_example[0], sources=['upload'], type='filepath')
                 using_dino = gr.Checkbox(label="标注位置", value=True)
             with gr.Column():
                 tags_area = gr.Textbox(label='标签', interactive=False)
@@ -93,14 +93,14 @@ with gr.Blocks(css=css, title="万物检测") as demo:
     with gr.Tab('检测【指定物】'):
         description_p = """ # 使用方法
 
-                    1. 上传/拍摄需要检测的图像。
+                    1. 上传需要检测的图像。
                     2. 填写物体描述【英文】。
                     3. 点击“检测”。
 
                 """
         with gr.Row():
             with gr.Column():
-                dino_img_input = gr.Image(label="选择图片", value=default_example[0], type='filepath')
+                dino_img_input = gr.Image(label="选择图片", value=default_example[0], sources=['upload'], type='filepath')
                 text_input = gr.Text(label="需检测物体的描述")
             with gr.Column():
                 msg_area = gr.Textbox(label='Log', interactive=False)

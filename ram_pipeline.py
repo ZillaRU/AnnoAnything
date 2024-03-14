@@ -39,7 +39,7 @@ class RAM:
                                             box_threshold=box_threshold, 
                                             text_threshold=text_threshold, 
                                             iou_threshold=iou_threshold)
-            img_with_bboxes.save(f'{box_threshold}-{text_threshold}-{iou_threshold}.jpg')
+            # img_with_bboxes.save(f'{box_threshold}-{text_threshold}-{iou_threshold}.jpg')
             ret['img_res'] = img_with_bboxes
         return ret
 
