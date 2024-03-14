@@ -9,11 +9,11 @@ import time
 
 
 parser = argparse.ArgumentParser(prog=__file__)
-parser.add_argument('--input', type=str, default='./test_imgs', help='path of input')
-parser.add_argument('--dev_id', type=int, default=0, help='device id')
-parser.add_argument('--conf_thresh', type=float, default=0.25, help='det confidence threshold')
-parser.add_argument('--nms_thresh', type=float, default=0.7, help='det nms threshold')
-parser.add_argument('--single_output', action='store_true', help='det confidence threshold')
+# parser.add_argument('--input', type=str, default='./test_imgs', help='path of input')
+# parser.add_argument('--dev_id', type=int, default=0, help='device id')
+# parser.add_argument('--conf_thresh', type=float, default=0.25, help='det confidence threshold')
+# parser.add_argument('--nms_thresh', type=float, default=0.7, help='det nms threshold')
+# parser.add_argument('--single_output', action='store_true', help='det confidence threshold')
 args = parser.parse_args()
 
 ram = RAM()
