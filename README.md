@@ -9,7 +9,7 @@
 ## 安装
 1. 拉取代码仓库，`git clone https://github.com/ZillaRU/AnnoAnything.git`，并`cd AnnoAnything`进入项目根目录。
 2. 安装依赖库，`pip3 install -r requirements.txt`
-3. 替换tpu_perf安装目录下的infer.py文件, 默认安装在"/home/$USER/.local/lib/python3.*/site-packages/tpu_perf/", 请根据具体环境确定路径。
+3. 替换tpu_perf安装目录下的infer.py文件, 默认安装在`/home/$USER/.local/lib/python3.*/site-packages/tpu_perf/`, 请根据具体环境确定路径。
     ```bash
     cp ./replace-this-file/infer.py /home/linaro/.local/lib/python3.8/site-packages/tpu_perf/ 
     ```
