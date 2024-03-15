@@ -7,24 +7,37 @@
 - 具有显著的灵活性，可满足各种应用场景的需求。
 
 ## 安装
-1. 拉取代码仓库，`git clone https://github.com/ZillaRU/AnnoAnything.git`，并`cd`
+1. 拉取代码仓库，`git clone https://github.com/ZillaRU/AnnoAnything.git`，并`cd AnnoAnything`进入项目根目录。
 2. 安装依赖库，`pip3 install -r requirements.txt`
-3. 安装tpu_perf
-    ```bash 
-    pip3 install tpu_perf*.whl
-    ```
-4. 替换tpu_perf安装目录下的infer.py文件, 默认安装在"/home/$USER/.local/lib/python3.*/site-packages/tpu_perf/", 请根据具体环境确定路径。
+3. 替换tpu_perf安装目录下的infer.py文件, 默认安装在`/home/$USER/.local/lib/python3.*/site-packages/tpu_perf/`, 请根据具体环境确定路径。
     ```bash
     cp ./replace-this-file/infer.py /home/linaro/.local/lib/python3.8/site-packages/tpu_perf/ 
     ```
-    若用了virtualenv，不是该路径可`python -c "import tpu_perf.infer as infer; print(infer.__file__)"`看下。
-6. 下载bmodel，并解压放在该项目根目录的`bmodel`文件夹。
+    若用了virtualenv，则被换掉的文件不是该路径，可`python3 -c "import tpu_perf; print(tpu_perf.__file__)"`查看。
+4. 下载bmodel，并解压（`unzip annoanything-bmodel.zip`）放在该项目根目录的`bmodel`文件夹。
    - sftp下载：
        ```bash
        pip3 install dfss --upgrade
        python3 -m dfss --url=open@sophgo.com:/aigc/annoanything-bmodel.zip
        ```
    - 或 [Google drive](https://drive.google.com/drive/folders/1WFfq32nKCYhEwJvCZV5XYw9sFRriZYqP?usp=sharing)
-8. 运行demo，`python3 app.py`。等待模型加载完毕，终端会提示端口号，通过浏览器用`本机ip:端口号`即可访问。
-    <img width="848" alt="示例" src="https://github.com/ZillaRU/AnnoAnything/assets/25343084/6a77ed66-3555-48c4-a58f-d3d52b2290fa">
+5. 运行demo，`python3 app.py`。等待模型加载完毕，终端会提示端口号，通过浏览器用`本机ip:端口号`即可访问。
+    - 示例：检测图中所有物体，输出tag并标出位置
+      <img width="848" alt="示例：输出tag并标出位置" src="https://github.com/ZillaRU/AnnoAnything/assets/25343084/6a77ed66-3555-48c4-a58f-d3d52b2290fa">
+    - 示例：描述需要检测的物体，并检测
+      <img width="848" alt="示例：输出tag并标出位置" src="https://github.com/ZillaRU/AnnoAnything/assets/25343084/7248472e-b0e3-46b6-bd1b-c5b5df13a0d5">
+
+## 耗时分析
+此为应用跑在服务器上测试的耗时数据，cpu耗时相比airbox可能偏短。未计入网络延迟。
+|操作|耗时（秒）|备注|
+|------|---------|----|
+|RAM image preprocess【CPU】|0.304|可优化。当前是cpu运算，后续可用tpu。|
+|RAM Swin-Base【TPU，FP16】|0.142|可做量化加速。|
+|RAM tagging_head【TPU，FP16】|0.026||
+|*detect_tags()整体*|0.458||
+|GroundingDINO image preprocess【CPU】|0.289|可优化。当前是cpu运算，后续可用tpu。|
+|GroundingDINO【TPU，FP16】|0.528|可做量化加速。|
+|PostProcess【CPU，包括在图上画框】|0.228|可优化。当前是cpu运算，后续可用tpu。|
+|*get_bbox()整体*|1.096||
+    
 
