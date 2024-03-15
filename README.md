@@ -27,5 +27,17 @@
     - 示例：描述需要检测的物体，并检测
       <img width="848" alt="示例：输出tag并标出位置" src="https://github.com/ZillaRU/AnnoAnything/assets/25343084/7248472e-b0e3-46b6-bd1b-c5b5df13a0d5">
 
+## 耗时分析
+此为应用跑在服务器上测试的耗时数据，cpu耗时相比airbox可能偏短。未计入网络延迟。
+|操作|耗时（秒）|备注|
+|------|---------|----|
+|RAM image preprocess【CPU】|0.304|可优化。当前是cpu运算，后续可用tpu。|
+|RAM Swin-Base【TPU，FP16】|0.142|可做量化加速。|
+|RAM tagging_head【TPU，FP16】|0.026||
+|*detect_tags()整体*|0.458||
+|GroundingDINO image preprocess【CPU】|0.289|可优化。当前是cpu运算，后续可用tpu。|
+|GroundingDINO【TPU，FP16】|0.528|可做量化加速。|
+|PostProcess【CPU，包括在图上画框】|0.228|可优化。当前是cpu运算，后续可用tpu。|
+|*get_bbox()整体*|1.096||
     
 
