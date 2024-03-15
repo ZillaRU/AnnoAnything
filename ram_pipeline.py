@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 import random
 import os
+import time
 import cv2
 from npuengine import EngineOV
 from PIL import Image, ImageDraw, ImageFont
@@ -16,7 +17,7 @@ class RAM:
         dino_path='bmodel/groundingdino_bm1684x_fp16.bmodel',
         tag_list='resources/tag_list/ram_tag_list.txt',
         tag_list_chinese='resources/tag_list/ram_tag_list_chinese.txt',
-        tokenizer_path = './groudingdino/utils/bert-base-uncased',
+        tokenizer_path='./groudingdino/utils/bert-base-uncased',
         device_id=0
     ):
         self.dino = EngineOV(dino_path, device_id=device_id)
@@ -45,12 +46,17 @@ class RAM:
 
 
     def detect_tag(self, image_path):
+        st1 = time.time()
         input_swin = preprocess(image_path, image_size=(384, 384))
+        print("============= img_preprocess", time.time()-st1)
+        st = time.time()
         output_swin = self.swin([input_swin])
+        print("=============[TPU] swin", time.time()-st)
         image_embeds, label_embed = output_swin[0], output_swin[1]
         image_atts = np.ones((1, 145)).astype(np.int32)
-
+        st = time.time()
         output_tag = self.tagging_head([label_embed, image_embeds, image_atts])
+        print("=============[TPU] tagging_head", time.time()-st)
         tag = output_tag[0]
         tag_output = []
         tag_output_chinese = []
@@ -58,11 +64,13 @@ class RAM:
         index = np.argwhere(tag[0] == 1)
         token = self.tag_list[index].squeeze(axis=1) ######## ram output, set of tags
         token_chinese = self.tag_list_chinese[index].squeeze(axis=1)
+        print("=============[Total] detect_tag", time.time()-st1)
         return token, token_chinese
     
     def get_bbox(self, image_path, token, box_threshold=0.25, text_threshold=0.2, iou_threshold=0.5):
+        st1 = time.time()
         input_dino = preprocess(image_path, image_size=(800, 800))
-
+        print("============= img_preprocess", time.time()-st1)
         caption = ', '.join(token)
         caption = caption.lower()
         caption = caption.strip()
@@ -75,7 +83,7 @@ class RAM:
         text_token_mask = tokenized["attention_mask"].astype(bool)
         proposals = gen_encoder_output_proposals()
         input_ids, token_type_ids, attention_mask = tokenized["input_ids"], tokenized["token_type_ids"], text_self_attention_masks
-
+        st = time.time()
         output_dino = self.dino([input_dino, position_ids.astype(np.int32), 
                                 text_self_attention_masks.astype(np.float32),
                                 input_ids.astype(np.int32),
@@ -83,6 +91,8 @@ class RAM:
                                 attention_mask.astype(np.float32),
                                 text_token_mask.astype(np.float32),
                                 proposals.astype(np.float32)])
+        print("=============[TPU] dino", time.time()-st)
+        st = time.time()
         logits, boxes = sigmoid(output_dino[0][0]), output_dino[1][0]
 
         # filter output
@@ -122,5 +132,7 @@ class RAM:
             boxes_filt[i][2:] += boxes_filt[i][:2]
         for box, label in zip(boxes_filt, pred_phrases):
             draw_box(box, image_draw, label)
+        print("==============PostProcess and draw boxes", time.time()-st)
+        print("==============[Total] get_bbox", time.time()-st1)
         return raw_image
 
